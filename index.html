@@ -67870,9 +67870,13 @@ function drawPE(){if(!PE.img)return;const x=document.getElementById('peCanvas').
 function pePoint(e){const r=document.getElementById('peCanvas').getBoundingClientRect();return {x:(e.clientX-r.left)/PE.sc,y:(e.clientY-r.top)/PE.sc};}
 function setPEtool(t){PE.tool=t;document.querySelectorAll('.pe').forEach(b=>b.classList.toggle('active',b.dataset.petool===t));}
 function renderPEColors(){const box=document.getElementById('peColors');box.innerHTML='';
-  ['#ff453a','#ff9f0a','#ffd60a','#34c759','#0a84ff','#ffffff','#1c1c1e'].forEach(c=>{const d=document.createElement('div');
-    d.style.cssText=`width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c===PE.color?'#fff':'rgba(255,255,255,.25)'};cursor:pointer;`;
-    d.onclick=()=>{PE.color=c;renderPEColors();};box.appendChild(d);});}
+  const palette=['#ff453a','#ff9f0a','#ffd60a','#34c759','#00c7ff','#0a84ff','#5856d6','#af52de','#ff2d55','#00b341','#30b0c0','#ffffff','#8e8e93'];
+  palette.forEach(c=>{const d=document.createElement('div');
+    d.style.cssText=`width:36px;height:36px;border-radius:50%;background:${c};border:3px solid ${c===PE.color?'#fff':'transparent'};cursor:pointer;box-shadow:${c===PE.color?'0 0 0 2px rgba(0,0,0,.3)':'none'};transition:all .15s;`;
+    d.onmouseover=()=>{d.style.transform='scale(1.1)';};
+    d.onmouseout=()=>{d.style.transform='scale(1)';};
+    d.onclick=()=>{PE.color=c;renderPEColors();drawPE();};
+    box.appendChild(d);});}
 function peUndo(){if(PE.ref&&PE.ref.marks.length){PE.ref.marks.pop();drawPE();}}
 function peDelete(){askConfirm('Remove this photo?',ok=>{if(ok){(state.editing||pendingPhotoPin).photos.splice(PE.idx,1);closeModal('photoModal');if(PE.pin)openPin(PE.pin);else renderPhotos();render();}});}
 function peDone(){closeModal('photoModal');if(PE.pin)openPin(PE.pin);else renderPhotos();}
