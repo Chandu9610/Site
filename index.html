@@ -542,10 +542,15 @@ stage.addEventListener('pointerup',e=>{
 stage.addEventListener('pointercancel',e=>{try{stage.releasePointerCapture(e.pointerId);}catch(_){}pointers.delete(e.pointerId);down=null;state.draft=null;render();});
 function startPinch(){const a=[...pointers.values()];startDist=dist(a[0].x,a[0].y,a[1].x,a[1].y);startScale=state.scale;
   const r=stage.getBoundingClientRect();startMid={x:(a[0].x+a[1].x)/2-r.left,y:(a[0].y+a[1].y)/2-r.top};startPan={x:state.panX,y:state.panY};}
-function doPinch(){const a=[...pointers.values()];const d=dist(a[0].x,a[0].y,a[1].x,a[1].y);if(!startDist)return;
-  const ns=Math.max(0.1,Math.min(8,startScale*(d/startDist)));
+function doPinch(){const a=[...pointers.values()];if(a.length<2)return;
+  const r=stage.getBoundingClientRect();
+  const curMid={x:(a[0].x+a[1].x)/2-r.left,y:(a[0].y+a[1].y)/2-r.top};
+  const d=dist(a[0].x,a[0].y,a[1].x,a[1].y);if(!startDist)return;
+  let ratio=d/startDist; if(Math.abs(ratio-1)<0.04)ratio=1; // dead-zone: flat two-finger drag = pure pan, no zoom drift
+  const ns=Math.max(0.1,Math.min(8,startScale*ratio));
   const wx=(startMid.x-startPan.x)/startScale,wy=(startMid.y-startPan.y)/startScale;
-  state.scale=ns;state.panX=startMid.x-wx*ns;state.panY=startMid.y-wy*ns;render();}
+  // pin the world point under the START midpoint to the CURRENT midpoint, so the drawing follows your fingers
+  state.scale=ns;state.panX=curMid.x-wx*ns;state.panY=curMid.y-wy*ns;render();}
 stage.addEventListener('wheel',e=>{if(!page())return;e.preventDefault();
   const r=stage.getBoundingClientRect(),sx=e.clientX-r.left,sy=e.clientY-r.top;
   const f=e.deltaY<0?1.1:0.9,ns=Math.max(0.1,Math.min(8,state.scale*f));
